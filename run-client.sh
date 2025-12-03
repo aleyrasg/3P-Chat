@@ -2,13 +2,13 @@
 
 # Script automatizado para compilar y ejecutar el cliente de chat RMI con GUI
 
-echo "🚀 Configurando Cliente de Chat RMI..."
-echo ""
+echo "🎨 Compilando Cliente de Chat Moderno..."
+echo "======================================="
 
 # Ir al directorio base
 cd "$(dirname "$0")"
 
-echo "🔨 Compilando archivos del cliente..."
+echo "📦 Compilando interfaces..."
 
 # Compilar las interfaces comunes primero
 cd Common
@@ -35,10 +35,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "✅ Compilación exitosa"
+echo "✅ Compilación exitosa!"
 echo ""
-echo "🎮 Iniciando interfaz gráfica del chat..."
-echo ""
+echo "🚀 Iniciando Cliente de Chat Moderno..."
+echo "======================================"
 
 # Ejecutar el cliente
 java ChatClientGUI

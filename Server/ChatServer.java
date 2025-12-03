@@ -24,7 +24,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
         super();
         connectedClients = new ConcurrentHashMap<>();
         pendingMessages = new ConcurrentHashMap<>();
-        System.out.println("✅ Servidor de chat inicializado");
+        System.out.println("[INFO] Servidor de chat inicializado");
     }
     
     /**
@@ -36,7 +36,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
         
         // Verificar si el nombre de usuario ya existe
         if (connectedClients.containsKey(username)) {
-            System.out.println("❌ Intento de registro fallido: " + username + " (nombre ya existe)");
+            System.out.println("[ERROR] Intento de registro fallido: " + username + " (nombre ya existe)");
             return false;
         }
         
@@ -44,7 +44,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
         connectedClients.put(username, clientRef);
         pendingMessages.putIfAbsent(username, new ArrayList<>());
         
-        System.out.println("✅ Usuario conectado: " + username + 
+        System.out.println("[INFO] Usuario conectado: " + username + 
                           " (Total: " + connectedClients.size() + ")");
         
         // Notificar a todos los demás clientes (encolando mensaje)
@@ -59,7 +59,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
     @Override
     public synchronized void unregisterClient(String username) throws RemoteException {
         if (connectedClients.remove(username) != null) {
-            System.out.println("👋 Usuario desconectado: " + username + 
+            System.out.println("[INFO] Usuario desconectado: " + username + 
                               " (Total: " + connectedClients.size() + ")");
             
             // Notificar a todos los clientes
@@ -72,7 +72,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
      */
     @Override
     public void broadcastMessage(String from, String message) throws RemoteException {
-        System.out.println("📢 Broadcast de " + from + ": " + message);
+        System.out.println("[BROADCAST] " + from + ": " + message);
         
         String fullMessage = "[BROADCAST] " + from + ": " + message;
         
@@ -81,7 +81,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
             pendingMessages.computeIfAbsent(username, k -> new ArrayList<>()).add(fullMessage);
         }
         
-        System.out.println("✅ Mensaje encolado para " + connectedClients.size() + " usuarios");
+        System.out.println("[INFO] Mensaje encolado para " + connectedClients.size() + " usuarios");
     }
     
     /**
@@ -89,7 +89,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
      */
     @Override
     public void sendDirectMessage(String from, String to, String message) throws RemoteException {
-        System.out.println("💌 Mensaje directo de " + from + " → " + to + ": " + message);
+        System.out.println("[DIRECTO] " + from + " -> " + to + ": " + message);
         
         // Verificar que el destinatario existe
         if (!connectedClients.containsKey(to)) {
@@ -104,7 +104,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
         String confirmationForSender = "[Tú → " + to + " (Directo)] " + message;
         pendingMessages.computeIfAbsent(from, k -> new ArrayList<>()).add(confirmationForSender);
         
-        System.out.println("✅ Mensaje directo encolado");
+        System.out.println("[INFO] Mensaje directo encolado");
     }
     
     /**
@@ -136,7 +136,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
             }
         }
         
-        System.out.println("📢 Notificación de ingreso encolada para " + (connectedClients.size() - 1) + " usuarios");
+        System.out.println("[INFO] Notificacion de ingreso encolada para " + (connectedClients.size() - 1) + " usuarios");
     }
     
     /**
@@ -153,7 +153,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
         // Eliminar cola de mensajes del usuario desconectado
         pendingMessages.remove(username);
         
-        System.out.println("📢 Notificación de salida encolada para " + connectedClients.size() + " usuarios");
+        System.out.println("[INFO] Notificacion de salida encolada para " + connectedClients.size() + " usuarios");
     }
     
     /**
@@ -170,7 +170,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
             result.put("messages", new ArrayList<>(messages));
             // Limpiar mensajes entregados
             pendingMessages.put(username, new ArrayList<>());
-            System.out.println("📬 Entregados " + messages.size() + " mensajes a " + username);
+            System.out.println("[INFO] Entregados " + messages.size() + " mensajes a " + username);
         } else {
             result.put("messages", new ArrayList<>());
         }
@@ -206,7 +206,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
             registry.rebind("ChatServer", server);
             
             System.out.println("========================================");
-            System.out.println("   🚀 SERVIDOR DE CHAT RMI ACTIVO");
+            System.out.println("    SERVIDOR DE CHAT RMI ACTIVO");
             System.out.println("========================================");
             System.out.println("IP del Servidor: " + serverIP);
             System.out.println("Puerto: " + port);
@@ -214,7 +214,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerInterfa
             System.out.println("Esperando conexiones de clientes...\n");
             
         } catch (Exception e) {
-            System.err.println("❌ Error en el servidor:");
+            System.err.println("[ERROR] Error en el servidor:");
             e.printStackTrace();
         }
     }
