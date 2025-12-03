@@ -543,77 +543,241 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     }
     
     public static void main(String[] args) {
-        // Diálogo de configuración moderno
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        showConnectionDialog();
+    }
+    
+    private static void showConnectionDialog() {
+        // Crear ventana de configuración profesional
+        JDialog dialog = new JDialog((Frame) null, "Configuración del Chat RMI", true);
+        dialog.setSize(450, 350);
+        dialog.setLocationRelativeTo(null);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.getContentPane().setBackground(BACKGROUND_COLOR);
+        
+        // Panel principal con diseño moderno
+        JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBackground(BACKGROUND_COLOR);
+        mainPanel.setBorder(new EmptyBorder(25, 25, 25, 25));
+        
+        // Header con título e icono
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(CARD_COLOR);
+        headerPanel.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, 1, true),
+            new EmptyBorder(20, 20, 20, 20)
+        ));
+        
+        JLabel titleLabel = new JLabel("Chat Distribuido RMI");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(PRIMARY_COLOR);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        JLabel subtitleLabel = new JLabel("Ingresa tus datos de conexión");
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitleLabel.setForeground(TEXT_COLOR);
+        subtitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+        headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
+        
+        // Panel de formulario
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(CARD_COLOR);
+        formPanel.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, 1, true),
+            new EmptyBorder(25, 25, 25, 25)
+        ));
         
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(12, 12, 12, 12);
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         
-        JTextField usernameField = new JTextField(15);
-        JTextField serverField = new JTextField("192.168.100.144", 15);
-        JTextField portField = new JTextField("1099", 15);
+        // Campos de entrada estilizados
+        JTextField usernameField = createStyledTextField("", "Ej: Juan123");
+        JTextField serverField = createStyledTextField("192.168.100.144", "IP del servidor");
+        JTextField portField = createStyledTextField("1099", "Puerto RMI");
         
-        // Estilo de campos
-        Font fieldFont = new Font("Segoe UI", Font.PLAIN, 13);
-        usernameField.setFont(fieldFont);
-        serverField.setFont(fieldFont);
-        portField.setFont(fieldFont);
+        // Labels estilizados
+        JLabel userLabel = createStyledLabel("Nombre de usuario:");
+        JLabel serverLabel = createStyledLabel("Dirección IP del servidor:");
+        JLabel portLabel = createStyledLabel("Puerto:");
         
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(new JLabel("👤 Nombre de usuario:"), gbc);
-        gbc.gridx = 1;
-        panel.add(usernameField, gbc);
+        // Agregar componentes al formulario
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
+        formPanel.add(userLabel, gbc);
+        gbc.gridy = 1;
+        formPanel.add(usernameField, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel("🌐 IP del servidor:"), gbc);
-        gbc.gridx = 1;
-        panel.add(serverField, gbc);
+        gbc.gridy = 2;
+        formPanel.add(serverLabel, gbc);
+        gbc.gridy = 3;
+        formPanel.add(serverField, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(new JLabel("🔌 Puerto:"), gbc);
-        gbc.gridx = 1;
-        panel.add(portField, gbc);
+        gbc.gridy = 4;
+        formPanel.add(portLabel, gbc);
+        gbc.gridy = 5;
+        formPanel.add(portField, gbc);
         
-        int result = JOptionPane.showConfirmDialog(null, panel,
-            "💬 Configuración del Chat RMI", JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.PLAIN_MESSAGE);
+        // Panel de botones
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        buttonPanel.setBackground(CARD_COLOR);
+        buttonPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
         
-        if (result == JOptionPane.OK_OPTION) {
+        JButton cancelButton = createDialogButton("Cancelar", new Color(107, 114, 128));
+        JButton connectButton = createDialogButton("Conectar", PRIMARY_COLOR);
+        
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(connectButton);
+        
+        formPanel.add(buttonPanel, gbc.gridy = 6);
+        
+        // Ensamblar diálogo
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+        
+        dialog.add(mainPanel);
+        
+        // Event listeners
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+            System.exit(0);
+        });
+        
+        connectButton.addActionListener(e -> {
             String username = usernameField.getText().trim();
             String serverIP = serverField.getText().trim();
             String portStr = portField.getText().trim();
             
-            if (username.isEmpty() || serverIP.isEmpty() || portStr.isEmpty()) {
-                JOptionPane.showMessageDialog(null,
-                    "Todos los campos son obligatorios",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
+            if (validateInput(username, serverIP, portStr)) {
+                try {
+                    String clientIP = java.net.InetAddress.getLocalHost().getHostAddress();
+                    System.setProperty("java.rmi.server.hostname", clientIP);
+                    
+                    int port = Integer.parseInt(portStr);
+                    dialog.dispose();
+                    new ChatClientGUI(username, serverIP, port);
+                    
+                } catch (NumberFormatException ex) {
+                    showErrorDialog("El puerto debe ser un número válido", "Error de Formato");
+                } catch (Exception ex) {
+                    showErrorDialog("Error al iniciar cliente: " + ex.getMessage(), "Error de Conexión");
+                    ex.printStackTrace();
+                    System.exit(1);
+                }
+            }
+        });
+        
+        // Enter para conectar
+        usernameField.addActionListener(e -> connectButton.doClick());
+        serverField.addActionListener(e -> connectButton.doClick());
+        portField.addActionListener(e -> connectButton.doClick());
+        
+        dialog.setVisible(true);
+    }
+    
+    private static JTextField createStyledTextField(String defaultText, String placeholder) {
+        JTextField field = new JTextField(defaultText, 20);
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        field.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, 1, true),
+            new EmptyBorder(10, 12, 10, 12)
+        ));
+        field.setBackground(BACKGROUND_COLOR);
+        field.setForeground(TEXT_COLOR);
+        
+        // Placeholder effect
+        if (defaultText.isEmpty()) {
+            field.setText(placeholder);
+            field.setForeground(Color.GRAY);
+            
+            field.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    if (field.getText().equals(placeholder)) {
+                        field.setText("");
+                        field.setForeground(TEXT_COLOR);
+                    }
+                }
+                
+                @Override
+                public void focusLost(FocusEvent e) {
+                    if (field.getText().isEmpty()) {
+                        field.setText(placeholder);
+                        field.setForeground(Color.GRAY);
+                    }
+                }
+            });
+        }
+        
+        return field;
+    }
+    
+    private static JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        label.setForeground(TEXT_COLOR);
+        return label;
+    }
+    
+    private static JButton createDialogButton(String text, Color bgColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setBackground(bgColor);
+        button.setForeground(Color.WHITE);
+        button.setBorder(new EmptyBorder(10, 20, 10, 20));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(100, 35));
+        
+        // Efectos hover
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(bgColor.darker());
             }
             
-            try {
-                String clientIP = java.net.InetAddress.getLocalHost().getHostAddress();
-                System.setProperty("java.rmi.server.hostname", clientIP);
-                
-                int port = Integer.parseInt(portStr);
-                new ChatClientGUI(username, serverIP, port);
-                
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null,
-                    "El puerto debe ser un número",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,
-                    "Error al iniciar cliente: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-                System.exit(1);
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(bgColor);
             }
-        } else {
-            System.exit(0);
-        }
+        });
+        
+        return button;
     }
+    
+    private static boolean validateInput(String username, String serverIP, String portStr) {
+        if (username.isEmpty() || username.equals("Ej: Juan123")) {
+            showErrorDialog("Por favor ingresa un nombre de usuario válido", "Campo Requerido");
+            return false;
+        }
+        
+        if (serverIP.isEmpty() || serverIP.equals("IP del servidor")) {
+            showErrorDialog("Por favor ingresa la dirección IP del servidor", "Campo Requerido");
+            return false;
+        }
+        
+        if (portStr.isEmpty() || portStr.equals("Puerto RMI")) {
+            showErrorDialog("Por favor ingresa el puerto del servidor", "Campo Requerido");
+            return false;
+        }
+        
+        try {
+            int port = Integer.parseInt(portStr);
+            if (port < 1 || port > 65535) {
+                showErrorDialog("El puerto debe estar entre 1 y 65535", "Puerto Inválido");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showErrorDialog("El puerto debe ser un número válido", "Formato Incorrecto");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private static void showErrorDialog(String message, String title) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+    }
+
 }
