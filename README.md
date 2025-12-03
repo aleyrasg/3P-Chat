@@ -193,13 +193,15 @@ Cliente A                    Servidor                     Cliente B
 ---
 
 ## Mejoras Implementadas
-✅ **Interfaz gráfica moderna** con Swing  
+✅ **Interfaz gráfica profesional** con Swing  
 ✅ **Dos modos de comunicación** (broadcast y P2P)  
 ✅ **Scripts de automatización** para compilación y ejecución  
 ✅ **Gestión robusta de conexiones** con manejo de errores  
 ✅ **Notificaciones en tiempo real** de usuarios  
 ✅ **Lista actualizada automáticamente** de usuarios online  
 ✅ **Thread-safe** con `ConcurrentHashMap` y `SwingUtilities`  
+✅ **Interfaz limpia y profesional** sin emojis en logs  
+✅ **Diálogo de configuración moderno** con validación  
 
 ---
 

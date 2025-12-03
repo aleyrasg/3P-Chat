@@ -58,25 +58,13 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     }
     
     private void setLookAndFeel() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
-            
-            // Personalizar colores globales
-            UIManager.put("Button.background", PRIMARY_COLOR);
-            UIManager.put("Button.foreground", Color.WHITE);
-            UIManager.put("Button.font", new Font("Segoe UI", Font.BOLD, 12));
-            UIManager.put("Panel.background", BACKGROUND_COLOR);
-            UIManager.put("TextField.font", new Font("Segoe UI", Font.PLAIN, 13));
-            UIManager.put("List.font", new Font("Segoe UI", Font.PLAIN, 12));
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Método simplificado sin configuración especial
+        // El Look and Feel por defecto es suficiente
     }
     
     private void initializeGUI() {
         frame = new JFrame();
-        frame.setTitle("💬 Chat RMI - " + username);
+        frame.setTitle("Chat RMI - " + username);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(900, 650);
         frame.setMinimumSize(new Dimension(700, 500));
@@ -104,7 +92,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         headerPanel.setPreferredSize(new Dimension(0, 70));
         
         // Título principal
-        JLabel titleLabel = new JLabel("💬 Chat Distribuido RMI");
+        JLabel titleLabel = new JLabel("Chat Distribuido RMI");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(PRIMARY_COLOR);
         titleLabel.setBorder(new EmptyBorder(15, 20, 5, 20));
@@ -113,11 +101,11 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
         statusPanel.setBackground(CARD_COLOR);
         
-        statusLabel = new JLabel("🔄 Conectando...");
+        statusLabel = new JLabel("Conectando...");
         statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         statusLabel.setForeground(WARNING_COLOR);
         
-        userCountLabel = new JLabel("👥 0 usuarios");
+        userCountLabel = new JLabel("0 usuarios conectados");
         userCountLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         userCountLabel.setForeground(TEXT_COLOR);
         
@@ -136,7 +124,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         chatPanel.setBorder(createModernBorder());
         
         // Título del chat
-        JLabel chatTitle = new JLabel("💬 Conversación");
+        JLabel chatTitle = new JLabel("Conversación");
         chatTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
         chatTitle.setForeground(TEXT_COLOR);
         chatTitle.setBorder(new EmptyBorder(15, 20, 10, 20));
@@ -170,7 +158,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         sidePanel.setPreferredSize(new Dimension(220, 0));
         
         // Título de usuarios
-        JLabel usersTitle = new JLabel("👥 Usuarios Online");
+        JLabel usersTitle = new JLabel("Usuarios Online");
         usersTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
         usersTitle.setForeground(TEXT_COLOR);
         usersTitle.setBorder(new EmptyBorder(15, 20, 10, 20));
@@ -213,8 +201,8 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         buttonPanel.setBackground(CARD_COLOR);
         
-        sendButton = createModernButton("📢 Enviar a Todos", PRIMARY_COLOR);
-        directMessageButton = createModernButton("📨 Mensaje Directo", SECONDARY_COLOR);
+        sendButton = createModernButton("Enviar a Todos", PRIMARY_COLOR);
+        directMessageButton = createModernButton("Mensaje Directo", SECONDARY_COLOR);
         
         buttonPanel.add(sendButton);
         buttonPanel.add(directMessageButton);
@@ -278,7 +266,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     
     private void connectToServer() {
         try {
-            appendToChat("🔄 Conectando al servidor " + serverIP + ":" + serverPort + "...", "system");
+            appendToChat("Conectando al servidor " + serverIP + ":" + serverPort + "...", "system");
             
             String url = "//" + serverIP + ":" + serverPort + "/ChatServer";
             server = (ChatServerInterface) Naming.lookup(url);
@@ -286,12 +274,12 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             boolean registered = server.registerClient(username, this);
             
             if (registered) {
-                statusLabel.setText("✅ Conectado como: " + username);
+                statusLabel.setText("Conectado como: " + username);
                 statusLabel.setForeground(SUCCESS_COLOR);
                 
-                appendToChat("✅ Conectado exitosamente como: " + username, "success");
-                appendToChat("📢 Los mensajes de broadcast llegan a todos los usuarios", "info");
-                appendToChat("📨 Selecciona un usuario para mensajes directos", "info");
+                appendToChat("Conectado exitosamente como: " + username, "success");
+                appendToChat("Los mensajes de broadcast llegan a todos los usuarios", "info");
+                appendToChat("Selecciona un usuario para mensajes directos", "info");
                 
                 updateUserList();
                 
@@ -301,7 +289,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
                 });
                 pollingTimer.start();
             } else {
-                statusLabel.setText("❌ Error: Nombre en uso");
+                statusLabel.setText("Error: Nombre en uso");
                 statusLabel.setForeground(ERROR_COLOR);
                 
                 JOptionPane.showMessageDialog(frame, 
@@ -311,10 +299,10 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             }
             
         } catch (Exception e) {
-            statusLabel.setText("❌ Error de conexión");
+            statusLabel.setText("Error de conexión");
             statusLabel.setForeground(ERROR_COLOR);
             
-            appendToChat("❌ Error al conectar: " + e.getMessage(), "error");
+            appendToChat("Error al conectar: " + e.getMessage(), "error");
             JOptionPane.showMessageDialog(frame,
                 "No se pudo conectar al servidor\n" + e.getMessage(),
                 "Error de Conexión", JOptionPane.ERROR_MESSAGE);
@@ -330,7 +318,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             server.broadcastMessage(username, message);
             messageField.setText("");
         } catch (RemoteException e) {
-            appendToChat("❌ Error al enviar mensaje: " + e.getMessage(), "error");
+            appendToChat("Error al enviar mensaje: " + e.getMessage(), "error");
         }
     }
     
@@ -351,7 +339,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             server.sendDirectMessage(username, selectedUser, message);
             messageField.setText("");
         } catch (RemoteException e) {
-            appendToChat("❌ Error al enviar mensaje directo: " + e.getMessage(), "error");
+            appendToChat("Error al enviar mensaje directo: " + e.getMessage(), "error");
         }
     }
     
@@ -384,7 +372,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
                         userListModel.addElement(user);
                     }
                 }
-                userCountLabel.setText("👥 " + users.size() + " usuarios");
+                userCountLabel.setText(users.size() + " usuarios conectados");
             });
         } catch (RemoteException e) {
             System.err.println("Error al actualizar lista: " + e.getMessage());
@@ -443,13 +431,13 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     
     private String getIconForType(String type) {
         switch (type) {
-            case "success": return "✅";
-            case "error": return "❌";
-            case "warning": return "⚠️";
-            case "direct": return "📨";
-            case "own": return "📤";
-            case "system": return "🔄";
-            default: return "💬";
+            case "success": return "[OK]";
+            case "error": return "[ERROR]";
+            case "warning": return "[WARN]";
+            case "direct": return "[DIRECTO]";
+            case "own": return "[ENVIADO]";
+            case "system": return "[SISTEMA]";
+            default: return "[CHAT]";
         }
     }
     
@@ -462,9 +450,9 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             if (server != null) {
                 server.unregisterClient(username);
             }
-            appendToChat("👋 Desconectado del servidor", "system");
+            appendToChat("Desconectado del servidor", "system");
         } catch (RemoteException e) {
-            appendToChat("❌ Error al desconectar", "error");
+            appendToChat("Error al desconectar", "error");
         } finally {
             System.exit(0);
         }
@@ -480,13 +468,13 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     
     @Override
     public void userJoined(String username) throws RemoteException {
-        appendToChat("✅ " + username + " se ha conectado", "success");
+        appendToChat(username + " se ha conectado", "success");
         updateUserList();
     }
     
     @Override
     public void userLeft(String username) throws RemoteException {
-        appendToChat("👋 " + username + " se ha desconectado", "warning");
+        appendToChat(username + " se ha desconectado", "warning");
         updateUserList();
     }
     
@@ -537,7 +525,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
                 setForeground(TEXT_COLOR);
             }
             
-            setText("👤 " + value.toString());
+            setText(value.toString());
             return this;
         }
     }
