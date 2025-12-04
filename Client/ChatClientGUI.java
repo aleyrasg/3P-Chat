@@ -177,6 +177,8 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         userList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 selectedUserForMessage = userList.getSelectedValue();
+                // Actualizar placeholder del campo de mensaje
+                updateMessageFieldPlaceholder();
                 if (selectedUserForMessage != null) {
                     // Actualizar estado visual inmediatamente
                     userList.repaint();
@@ -208,6 +210,9 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             new EmptyBorder(12, 15, 12, 15)
         ));
         messageField.setBackground(BACKGROUND_COLOR);
+        
+        // Actualizar placeholder según selección
+        updateMessageFieldPlaceholder();
         
         // Panel de botones
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
@@ -266,9 +271,10 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     private void setupEventListeners() {
         sendButton.addActionListener(e -> sendBroadcastMessage());
         directMessageButton.addActionListener(e -> sendDirectMessage());
+        // Enter envía mensaje (directo si hay usuario seleccionado, broadcast si no)
         messageField.addActionListener(e -> sendBroadcastMessage());
         
-        // Listener para doble click en usuario (opcional)
+        // Listener para click en usuario
         userList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -277,10 +283,11 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
                     int index = userList.locationToIndex(e.getPoint());
                     if (index >= 0) {
                         userList.setSelectedIndex(index);
-                        String selectedUser = userList.getSelectedValue();
-                        if (selectedUser != null) {
-                            // Opcional: mostrar en el campo de mensaje a quién va dirigido
+                        selectedUserForMessage = userList.getSelectedValue();
+                        if (selectedUserForMessage != null) {
                             messageField.requestFocus();
+                            // Actualizar visualmente
+                            userList.repaint();
                         }
                     }
                 }
@@ -345,6 +352,14 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         String message = messageField.getText().trim();
         if (message.isEmpty()) return;
         
+        // Verificar si hay un usuario seleccionado para envío directo
+        String selectedUser = getSelectedUser();
+        if (selectedUser != null) {
+            // Si hay usuario seleccionado, enviar mensaje directo
+            sendDirectMessageToUser(selectedUser, message);
+            return;
+        }
+        
         try {
             server.broadcastMessage(username, message);
             messageField.setText("");
@@ -354,7 +369,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     }
     
     private void sendDirectMessage() {
-        String selectedUser = selectedUserForMessage != null ? selectedUserForMessage : userList.getSelectedValue();
+        String selectedUser = getSelectedUser();
         if (selectedUser == null) {
             showModernDialog("Selecciona un usuario de la lista", "Selección requerida", JOptionPane.WARNING_MESSAGE);
             return;
@@ -366,12 +381,47 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
             return;
         }
         
+        sendDirectMessageToUser(selectedUser, message);
+    }
+    
+    private String getSelectedUser() {
+        // Priorizar la selección actual de la lista
+        String currentSelection = userList.getSelectedValue();
+        if (currentSelection != null) {
+            selectedUserForMessage = currentSelection;
+            return currentSelection;
+        }
+        // Usar la variable de respaldo si no hay selección actual
+        return selectedUserForMessage;
+    }
+    
+    private void sendDirectMessageToUser(String selectedUser, String message) {
         try {
             server.sendDirectMessage(username, selectedUser, message);
             messageField.setText("");
+            // Deseleccionar usuario después del envío
+            clearUserSelection();
         } catch (RemoteException e) {
             appendToChat("Error al enviar mensaje directo: " + e.getMessage(), "error");
         }
+    }
+    
+    private void clearUserSelection() {
+        SwingUtilities.invokeLater(() -> {
+            userList.clearSelection();
+            selectedUserForMessage = null;
+            updateMessageFieldPlaceholder();
+        });
+    }
+    
+    private void updateMessageFieldPlaceholder() {
+        SwingUtilities.invokeLater(() -> {
+            if (selectedUserForMessage != null) {
+                messageField.setToolTipText("Mensaje directo para: " + selectedUserForMessage);
+            } else {
+                messageField.setToolTipText("Escribe tu mensaje (se enviará a todos)");
+            }
+        });
     }
     
     private void fetchPendingMessages() {
