@@ -44,6 +44,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     private ChatServerInterface server;
     private String serverIP;
     private int serverPort;
+    private String selectedUserForMessage = null; // Usuario seleccionado para mensajes directos
     
     public ChatClientGUI(String username, String serverIP, int serverPort) throws RemoteException {
         super(0);
@@ -172,6 +173,17 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         userList.setBorder(new EmptyBorder(10, 15, 10, 15));
         userList.setCellRenderer(new ModernListCellRenderer());
         
+        // Agregar listener para mantener selección
+        userList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                selectedUserForMessage = userList.getSelectedValue();
+                if (selectedUserForMessage != null) {
+                    // Actualizar estado visual inmediatamente
+                    userList.repaint();
+                }
+            }
+        });
+        
         JScrollPane userScroll = new JScrollPane(userList);
         userScroll.setBorder(null);
         userScroll.getVerticalScrollBar().setUI(new ModernScrollBarUI());
@@ -256,6 +268,25 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         directMessageButton.addActionListener(e -> sendDirectMessage());
         messageField.addActionListener(e -> sendBroadcastMessage());
         
+        // Listener para doble click en usuario (opcional)
+        userList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) {
+                    // Un click: seleccionar usuario
+                    int index = userList.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        userList.setSelectedIndex(index);
+                        String selectedUser = userList.getSelectedValue();
+                        if (selectedUser != null) {
+                            // Opcional: mostrar en el campo de mensaje a quién va dirigido
+                            messageField.requestFocus();
+                        }
+                    }
+                }
+            }
+        });
+        
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -323,7 +354,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     }
     
     private void sendDirectMessage() {
-        String selectedUser = userList.getSelectedValue();
+        String selectedUser = selectedUserForMessage != null ? selectedUserForMessage : userList.getSelectedValue();
         if (selectedUser == null) {
             showModernDialog("Selecciona un usuario de la lista", "Selección requerida", JOptionPane.WARNING_MESSAGE);
             return;
@@ -366,12 +397,25 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         try {
             List<String> users = server.getOnlineUsers();
             SwingUtilities.invokeLater(() -> {
+                // Guardar la selección actual
+                String selectedUser = userList.getSelectedValue();
+                
                 userListModel.clear();
                 for (String user : users) {
                     if (!user.equals(username)) {
                         userListModel.addElement(user);
                     }
                 }
+                
+                // Restaurar la selección si el usuario sigue conectado
+                if (selectedUser != null && userListModel.contains(selectedUser)) {
+                    userList.setSelectedValue(selectedUser, true);
+                    selectedUserForMessage = selectedUser;
+                } else if (selectedUserForMessage != null && userListModel.contains(selectedUserForMessage)) {
+                    // Usar la variable de respaldo si existe
+                    userList.setSelectedValue(selectedUserForMessage, true);
+                }
+                
                 userCountLabel.setText(users.size() + " usuarios conectados");
             });
         } catch (RemoteException e) {
@@ -514,18 +558,23 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
                 boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             
-            setBorder(new EmptyBorder(8, 12, 8, 12));
+            setBorder(new CompoundBorder(
+                new LineBorder(isSelected ? PRIMARY_COLOR : BORDER_COLOR, 1, true),
+                new EmptyBorder(10, 15, 10, 15)
+            ));
             setFont(new Font("Segoe UI", Font.PLAIN, 13));
             
             if (isSelected) {
                 setBackground(PRIMARY_COLOR);
                 setForeground(Color.WHITE);
+                setOpaque(true);
             } else {
-                setBackground(Color.WHITE);
+                setBackground(BACKGROUND_COLOR);
                 setForeground(TEXT_COLOR);
+                setOpaque(true);
             }
             
-            setText(value.toString());
+            setText("● " + value.toString()); // Punto para indicar usuario
             return this;
         }
     }
