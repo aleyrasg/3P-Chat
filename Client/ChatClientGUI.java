@@ -537,9 +537,10 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     private static void showConnectionDialog() {
         // Crear ventana de configuración profesional
         JDialog dialog = new JDialog((Frame) null, "Configuración del Chat RMI", true);
-        dialog.setSize(450, 350);
+        dialog.setSize(480, 400);
         dialog.setLocationRelativeTo(null);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setResizable(false);
         dialog.getContentPane().setBackground(BACKGROUND_COLOR);
         
         // Panel principal con diseño moderno
@@ -610,15 +611,23 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         // Panel de botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         buttonPanel.setBackground(CARD_COLOR);
-        buttonPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
+        buttonPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
         
         JButton cancelButton = createDialogButton("Cancelar", new Color(107, 114, 128));
         JButton connectButton = createDialogButton("Conectar", PRIMARY_COLOR);
         
+        // Hacer el botón conectar más prominente
+        connectButton.setPreferredSize(new Dimension(120, 40));
+        connectButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        
         buttonPanel.add(cancelButton);
         buttonPanel.add(connectButton);
         
-        formPanel.add(buttonPanel, gbc.gridy = 6);
+        // Asegurar que el panel de botones se muestre correctamente
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(buttonPanel, gbc);
         
         // Ensamblar diálogo
         mainPanel.add(headerPanel, BorderLayout.NORTH);
@@ -710,13 +719,18 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     
     private static JButton createDialogButton(String text, Color bgColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
         button.setBackground(bgColor);
         button.setForeground(Color.WHITE);
-        button.setBorder(new EmptyBorder(10, 20, 10, 20));
+        button.setBorder(new CompoundBorder(
+            new LineBorder(bgColor.darker(), 1),
+            new EmptyBorder(12, 25, 12, 25)
+        ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(100, 35));
+        button.setPreferredSize(new Dimension(110, 40));
+        button.setOpaque(true);
+        button.setBorderPainted(true);
         
         // Efectos hover
         button.addMouseListener(new MouseAdapter() {
