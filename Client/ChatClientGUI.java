@@ -537,7 +537,7 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     private static void showConnectionDialog() {
         // Crear ventana de configuración profesional
         JDialog dialog = new JDialog((Frame) null, "Configuración del Chat RMI", true);
-        dialog.setSize(480, 400);
+        dialog.setSize(550, 500);
         dialog.setLocationRelativeTo(null);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setResizable(false);
@@ -569,18 +569,14 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         headerPanel.add(titleLabel, BorderLayout.CENTER);
         headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
         
-        // Panel de formulario
-        JPanel formPanel = new JPanel(new GridBagLayout());
+        // Panel de formulario con layout vertical simple
+        JPanel formPanel = new JPanel();
+        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBackground(CARD_COLOR);
         formPanel.setBorder(new CompoundBorder(
             new LineBorder(BORDER_COLOR, 1, true),
-            new EmptyBorder(25, 25, 25, 25)
+            new EmptyBorder(30, 30, 30, 30)
         ));
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(12, 12, 12, 12);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         
         // Campos de entrada estilizados
         JTextField usernameField = createStyledTextField("", "Ej: Juan123");
@@ -592,42 +588,43 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
         JLabel serverLabel = createStyledLabel("Dirección IP del servidor:");
         JLabel portLabel = createStyledLabel("Puerto:");
         
-        // Agregar componentes al formulario
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
-        formPanel.add(userLabel, gbc);
-        gbc.gridy = 1;
-        formPanel.add(usernameField, gbc);
+        // Agregar componentes verticalmente con espaciado
+        formPanel.add(userLabel);
+        formPanel.add(Box.createVerticalStrut(8));
+        formPanel.add(usernameField);
+        formPanel.add(Box.createVerticalStrut(20));
         
-        gbc.gridy = 2;
-        formPanel.add(serverLabel, gbc);
-        gbc.gridy = 3;
-        formPanel.add(serverField, gbc);
+        formPanel.add(serverLabel);
+        formPanel.add(Box.createVerticalStrut(8));
+        formPanel.add(serverField);
+        formPanel.add(Box.createVerticalStrut(20));
         
-        gbc.gridy = 4;
-        formPanel.add(portLabel, gbc);
-        gbc.gridy = 5;
-        formPanel.add(portField, gbc);
+        formPanel.add(portLabel);
+        formPanel.add(Box.createVerticalStrut(8));
+        formPanel.add(portField);
+        formPanel.add(Box.createVerticalStrut(30));
         
-        // Panel de botones
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        // Panel de botones centrado
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setBackground(CARD_COLOR);
-        buttonPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
+        buttonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         
-        JButton cancelButton = createDialogButton("Cancelar", new Color(107, 114, 128));
-        JButton connectButton = createDialogButton("Conectar", PRIMARY_COLOR);
+        JButton cancelButton = createDialogButton("Cancelar", new Color(120, 120, 120));
+        JButton connectButton = createDialogButton("CONECTAR", new Color(34, 197, 94)); // Verde brillante
         
-        // Hacer el botón conectar más prominente
-        connectButton.setPreferredSize(new Dimension(120, 40));
-        connectButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        // Hacer el botón conectar MUY prominente
+        connectButton.setPreferredSize(new Dimension(250, 55));
+        connectButton.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        connectButton.setBackground(new Color(34, 197, 94));
+        connectButton.setBorder(new CompoundBorder(
+            new LineBorder(new Color(22, 163, 74), 3),
+            new EmptyBorder(15, 40, 15, 40)
+        ));
         
         buttonPanel.add(cancelButton);
         buttonPanel.add(connectButton);
         
-        // Asegurar que el panel de botones se muestre correctamente
-        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(buttonPanel, gbc);
+        formPanel.add(buttonPanel);
         
         // Ensamblar diálogo
         mainPanel.add(headerPanel, BorderLayout.NORTH);
@@ -719,16 +716,16 @@ public class ChatClientGUI extends UnicastRemoteObject implements ChatClientInte
     
     private static JButton createDialogButton(String text, Color bgColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setBackground(bgColor);
         button.setForeground(Color.WHITE);
         button.setBorder(new CompoundBorder(
-            new LineBorder(bgColor.darker(), 1),
-            new EmptyBorder(12, 25, 12, 25)
+            new LineBorder(bgColor.darker(), 2),
+            new EmptyBorder(15, 30, 15, 30)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(110, 40));
+        button.setPreferredSize(new Dimension(130, 45));
         button.setOpaque(true);
         button.setBorderPainted(true);
         
